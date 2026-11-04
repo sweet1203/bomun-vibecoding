@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>보문고 바이브코딩 연수</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 레이아웃: 상단 고정 목차 + 한 줄로 읽어 내려가는 안내서. 섹션 순서 = 연수 진행 순서 */
+:root {
+  --paper: #f5f7f4; --card: #ffffff; --ink: #1b2622; --muted: #5b6b64; --line: #d9e1dc;
+  --accent: #1f6b4f; --accent-soft: #e3efe8; --warn-bg: #fff4ec; --warn-ink: #8a3d10;
+  --t-class: #2459a8; --t-home: #b0640b; --t-work: #7a3f8f;
+  --font-display: "Do Hyeon", "IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121a17; --card: #1a2420; --ink: #e6ede9; --muted: #9aaba3; --line: #2c3a34;
+    --accent: #6cc59c; --accent-soft: #1f3a2e; --warn-bg: #33231a; --warn-ink: #f5b48a;
+    --t-class: #7fb0f5; --t-home: #f0aa55; --t-work: #cf9ae0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121a17; --card: #1a2420; --ink: #e6ede9; --muted: #9aaba3; --line: #2c3a34;
+  --accent: #6cc59c; --accent-soft: #1f3a2e; --warn-bg: #33231a; --warn-ink: #f5b48a;
+  --t-class: #7fb0f5; --t-home: #f0aa55; --t-work: #cf9ae0; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--accent); }
+h1, h2 { font-family: var(--font-display); font-weight: 400; line-height: 1.2; text-wrap: balance; }
+
+nav.top { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+nav.top .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+nav.top a { flex: none; text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 500; padding: 5px 12px; border-radius: 999px; }
+nav.top a:hover, nav.top a:focus-visible { background: var(--accent-soft); color: var(--accent); outline: none; }
+
+header { padding-block: 44px 8px; }
+.eyebrow { font-size: 13px; letter-spacing: .12em; color: var(--accent); font-weight: 700; }
+header h1 { font-size: clamp(36px, 7vw, 58px); margin: 6px 0 12px; }
+.lead { color: var(--muted); font-size: 17px; margin: 0; max-width: 60ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.facts span { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; font-size: 14px; }
+.facts b { color: var(--muted); font-weight: 500; margin-right: 6px; }
+
+section { padding-block: 36px 8px; }
+section h2 { font-size: 30px; margin: 0 0 6px; }
+section > .wrap > p.sub { color: var(--muted); margin: 0 0 18px; }
+
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.big-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.big-link { display: grid; gap: 4px; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; transition: border-color .15s; }
+.big-link:hover, .big-link:focus-visible { border-color: var(--accent); outline: none; }
+.big-link strong { font-family: var(--font-display); font-weight: 400; font-size: 24px; }
+.big-link span { color: var(--muted); font-size: 14px; }
+.big-link .go { color: var(--accent); font-weight: 700; font-size: 14px; }
+.big-link.primary { background: var(--accent); border-color: var(--accent); color: var(--card); }
+.big-link.primary span, .big-link.primary .go { color: var(--card); opacity: .9; }
+
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.checks li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
+.checks input { width: 20px; height: 20px; margin-top: 4px; accent-color: var(--accent); }
+.checks label b { display: block; }
+.checks label span { color: var(--muted); font-size: 14px; }
+
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.timeline li { display: grid; grid-template-columns: 76px 1fr; gap: 16px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.timeline li:last-child { border-bottom: 0; }
+.timeline .time { font-family: var(--font-display); font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.timeline b { display: block; }
+.timeline span { color: var(--muted); font-size: 15px; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.steps li::before { counter-increment: s; content: counter(s); width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--card); display: grid; place-items: center; font-weight: 700; }
+.steps b { display: block; font-size: 17px; }
+.steps span { color: var(--muted); font-size: 15px; }
+
+.tracks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.track { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.track .chip { display: inline-block; font-size: 13px; font-weight: 700; border: 1.5px solid currentColor; border-radius: 6px; padding: 1px 8px; }
+.track ul { margin: 10px 0 0; padding-left: 18px; font-size: 15px; }
+.track .demo { display: inline-block; margin-top: 10px; font-size: 14px; font-weight: 700; }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 700; padding-block: 14px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--accent); font-size: 20px; line-height: 1; }
+details[open] summary::after { content: "−"; }
+details > div { padding-bottom: 14px; color: var(--ink); }
+details > div p { margin: 0 0 8px; }
+q.say { display: block; quotes: none; background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 8px 12px; font-weight: 500; margin: 6px 0; }
+
+.promises { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.promise { background: var(--warn-bg); color: var(--warn-ink); border-radius: 12px; padding: 16px; }
+.promise b { display: block; font-size: 17px; margin-bottom: 4px; }
+.promise span { font-size: 14px; }
+
+.pending { color: var(--muted); font-size: 14px; }
+footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
+
+@media (max-width: 720px) {
+  .big-links, .tracks, .promises { grid-template-columns: minmax(0, 1fr); }
+  .timeline li { grid-template-columns: 60px 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav class="top" aria-label="목차">
+  <div class="wrap">
+    <a href="#ready">시작 전</a>
+    <a href="#flow">오늘의 흐름</a>
+    <a href="#how">만드는 법</a>
+    <a href="#tracks">트랙 고르기</a>
+    <a href="#stuck">막혔을 때</a>
+    <a href="#rules">약속</a>
+    <a href="#share">공유 · 설문</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">2026 보문고 바이브코딩 연수</div>
+    <h1>말로 만드는 나만의 학교 도구</h1>
+    <p class="lead">코딩을 몰라도 괜찮아요. AI에게 말로 설명해서 수업·학급·업무에 쓸 도구를 하나씩 만들어 들고 가요. 오늘은 아무것도 설치하지 않아요.</p>
+    <div class="facts" id="facts"></div>
+  </header>
+</div>
+
+<section id="materials">
+  <div class="wrap">
+    <div class="big-links">
+      <a class="big-link primary" href="recipes.html" target="_blank" rel="noopener">
+        <strong>레시피 카드 12장</strong>
+        <span>복사해서 바로 쓰는 프롬프트 · 고쳐 보기 문장</span>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="big-link" href="#tracks">
+        <strong>완성 예시 3가지</strong>
+        <span>자리 배치 · 모둠 대항 퀴즈쇼 · 출결 이상 확인기</span>
+        <span class="go">보러 가기 ↓</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="ready">
+  <div class="wrap">
+    <h2>시작 전 확인</h2>
+    <p class="sub">체크하면서 준비해 주세요. 막히면 손을 들어 주세요.</p>
+    <div class="panel">
+      <ul class="checks">
+        <li><input type="checkbox" id="c1"><label for="c1"><b>크롬 브라우저에서 구글 계정 로그인</b><span>학교 계정에서 Gemini가 막혀 있으면 개인 구글 계정으로 해 주세요.</span></label></li>
+        <li><input type="checkbox" id="c2"><label for="c2"><b>Gemini 열기</b><span><a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a> · ChatGPT를 쓰셔도 괜찮아요 (<a href="https://chatgpt.com" target="_blank" rel="noopener">chatgpt.com</a>)</span></label></li>
+        <li><input type="checkbox" id="c3"><label for="c3"><b>입력창에서 Canvas 찾아 두기</b><span>Gemini는 입력창의 도구에서 「Canvas」, ChatGPT는 「캔버스」를 골라요.</span></label></li>
+        <li><input type="checkbox" id="c4"><label for="c4"><b>만들고 싶은 것 한 줄 떠올리기</b><span>없어도 괜찮아요. 레시피 카드에서 골라 따라 만들면 돼요.</span></label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="flow">
+  <div class="wrap">
+    <h2>오늘의 흐름</h2>
+    <p class="sub">3시간 기준이에요. 중간에 10분 쉬어요.</p>
+    <div class="panel">
+      <ol class="timeline">
+        <li><div class="time">15분</div><div><b>바이브코딩 보기</b><span>강사가 자리 배치 프로그램을 말로 만들고 고치는 모습을 봐요.</span></div></li>
+        <li><div class="time">15분</div><div><b>동료 교사 사례</b><span>수학·국어·영어 선생님이 만든 수업 도구를 둘러봐요.</span></div></li>
+        <li><div class="time">30분</div><div><b>다 같이 첫 앱 완성</b><span>레시피 카드 「랜덤 모둠 편성 & 발표자 뽑기」를 모두 함께 만들어요.</span></div></li>
+        <li><div class="time">70분</div><div><b>내 트랙 골라 만들기</b><span>수업 · 학급 · 업무 중 하나를 골라 만들고 세 번 이상 고쳐요.</span></div></li>
+        <li><div class="time">20분</div><div><b>잘 쓰는 법</b><span>개인정보, AI 결과 확인, 저장과 공유 방법</span></div></li>
+        <li><div class="time">20분</div><div><b>갤러리 워크</b><span>공유보드에 내 작품을 올리고 서로 써 보며 댓글을 남겨요.</span></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>만드는 법 4단계</h2>
+    <p class="sub">모든 레시피가 이 순서예요.</p>
+    <ol class="steps">
+      <li><div><b>Canvas를 켜고 프롬프트 붙여넣기</b><span>레시피 카드의 「프롬프트 복사」를 눌러 붙여넣고, 노란 [대괄호]만 내 상황으로 바꿔서 보내요.</span></div></li>
+      <li><div><b>직접 눌러 보기</b><span>오른쪽 미리보기에서 버튼을 눌러 보고, 이상한 곳이나 더 있었으면 하는 기능을 찾아요.</span></div></li>
+      <li><div><b>한 번에 하나씩 말로 고치기</b><span>「↻ 고쳐 보기」 문장을 누르면 복사돼요. 여러 개를 한꺼번에 시키면 엉키기 쉬워요.</span></div></li>
+      <li><div><b>공유하거나 파일로 저장하기</b><span>공유 버튼으로 링크를 만들거나, 코드를 .html 파일로 저장해요. 방법은 아래 「막혔을 때」에 있어요.</span></div></li>
+    </ol>
+    <div class="panel" style="margin-top:12px">
+      <b>내 아이디어로 만들 때</b>
+      <p style="margin:6px 0 0">무엇을 + 누가·어디서 쓰나 + 기능 3~5개 + 모양 + <b>"하나의 HTML 파일로"</b></p>
+      <p class="pending" style="margin:4px 0 0">예) 수업 끝 5분 복습용 OX 퀴즈를 전자칠판에 띄워 쓸 거야. 10문제, 정답 효과음, 점수. 글씨 아주 크게. 하나의 HTML 파일로.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tracks">
+  <div class="wrap">
+    <h2>트랙 고르기</h2>
+    <p class="sub">사전 설문에서 가장 많이 원하신 세 가지예요. 완성 예시를 먼저 눌러 보세요.</p>
+    <div class="tracks">
+      <div class="track">
+        <span class="chip" style="color:var(--t-class)">수업 활동</span>
+        <ul><li>단원 복습 퀴즈</li><li>모둠 대항 퀴즈쇼</li><li>교과 개념 시뮬레이션</li><li>단어 플래시카드</li></ul>
+        <a class="demo" href="demo/quizshow.html" target="_blank" rel="noopener">예시: 모둠 대항 퀴즈쇼 →</a>
+      </div>
+      <div class="track">
+        <span class="chip" style="color:var(--t-home)">학급 활동</span>
+        <ul><li>자리 배치 프로그램</li><li>우리 반 홈페이지</li><li>1인 1역 & 청소 당번표</li><li>학급 투표 & 의견 모으기</li></ul>
+        <a class="demo" href="demo/seats.html" target="_blank" rel="noopener">예시: 자리 배치 →</a>
+      </div>
+      <div class="track">
+        <span class="chip" style="color:var(--t-work)">업무</span>
+        <ul><li>출결 이상 확인기</li><li>수행평가 점수 환산기</li><li>글쓰기 루브릭 채점판</li></ul>
+        <a class="demo" href="demo/attendance.html" target="_blank" rel="noopener">예시: 출결 이상 확인기 →</a>
+      </div>
+    </div>
+    <p class="pending">출결 이상 확인기 예시는 「연습용 가짜 데이터로 보기」를 눌러 보세요. 가짜 엑셀 파일은 <a href="demo/sample-attendance.xlsx">여기서 받을 수 있어요</a>.</p>
+  </div>
+</section>
+
+<section id="stuck">
+  <div class="wrap">
+    <h2>막혔을 때</h2>
+    <p class="sub">자주 막히는 순서대로예요. 그래도 안 되면 손을 들어 주세요.</p>
+
+    <details>
+      <summary>Canvas가 안 보여요</summary>
+      <div>
+        <p>입력창 근처의 「도구」 메뉴 안에 있을 수 있어요. 학교(Workspace) 계정에서는 기능이 꺼져 있는 경우가 있어요.</p>
+        <p>→ <b>개인 구글 계정</b>으로 다시 로그인하거나, <b>ChatGPT의 캔버스</b>를 써요.</p>
+      </div>
+    </details>
+    <details>
+      <summary>미리보기 없이 코드만 길게 나와요</summary>
+      <div>
+        <p>Canvas를 켜지 않고 보낸 경우예요. Canvas를 켠 뒤 이렇게 말해요.</p>
+        <q class="say">방금 코드를 캔버스에서 미리보기로 보여 줘.</q>
+      </div>
+    </details>
+    <details>
+      <summary>화면이 하얗거나 버튼이 안 눌려요</summary>
+      <div>
+        <q class="say">화면이 하얗게 나와. 오류를 찾아서 고쳐 줘.</q>
+        <p>어떤 버튼을 눌렀을 때 무엇이 안 되는지 구체적으로 말할수록 잘 고쳐요.</p>
+      </div>
+    </details>
+    <details>
+      <summary>고칠수록 점점 이상해져요</summary>
+      <div>
+        <q class="say">처음 요구사항만 남기고 더 단순하게 다시 만들어 줘.</q>
+        <p>Canvas에서 이전 버전으로 되돌릴 수도 있어요. 다시 고칠 때는 한 번에 하나씩만 요청해요.</p>
+      </div>
+    </details>
+    <details>
+      <summary>일부만 바뀌고 나머지가 사라졌어요</summary>
+      <div><q class="say">고친 부분까지 합쳐서 전체 코드를 다시 줘.</q></div>
+    </details>
+    <details>
+      <summary>공유 링크를 만들고 싶어요</summary>
+      <div>
+        <p>Canvas 화면의 <b>공유</b> 버튼으로 링크를 만들 수 있어요. 받는 사람이 로그인해야 열리는 경우가 있으니, 학생에게 주기 전에 다른 브라우저(시크릿 창)에서 열어 확인해요.</p>
+      </div>
+    </details>
+    <details>
+      <summary>.html 파일로 저장하고 싶어요</summary>
+      <div>
+        <p>1. Canvas의 코드 보기에서 <b>코드 전체를 복사</b>해요.</p>
+        <p>2. 메모장(Mac은 텍스트 편집기의 「일반 텍스트」)에 붙여넣어요.</p>
+        <p>3. 「다른 이름으로 저장」 → 파일 형식 <b>모든 파일</b>, 인코딩 <b>UTF-8</b>, 이름 끝을 <b>.html</b>로 저장해요. 예) <code>자리배치.html</code></p>
+        <p>4. 저장한 파일을 더블클릭하면 브라우저에서 열려요. 인터넷 없이도 대부분 작동해요.</p>
+      </div>
+    </details>
+    <details>
+      <summary>엑셀 파일을 넣어도 반응이 없어요</summary>
+      <div>
+        <p>엑셀을 읽는 도구를 인터넷에서 받아 오는 경우가 많아요. 인터넷 연결을 확인하고, 그래도 안 되면 이렇게 말해요.</p>
+        <q class="say">엑셀 파일을 끌어다 놓아도 반응이 없어. 파일 고르기 버튼도 만들고, 읽기 오류가 나면 화면에 이유를 보여 줘.</q>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <h2>세 가지 약속</h2>
+    <p class="sub">AI로 만든 도구를 학교에서 쓸 때 꼭 지켜 주세요.</p>
+    <div class="promises">
+      <div class="promise"><b>개인정보는 넣지 않기</b><span>이름·성적·출결 파일을 AI 채팅창에 올리지 않아요. 번호나 가짜 데이터로 만들고, 실제 파일은 완성된 도구에 내 컴퓨터에서 넣어요.</span></div>
+      <div class="promise"><b>결과는 직접 확인하기</b><span>AI가 만든 문제·해설·공식·계산은 그럴듯해도 틀릴 수 있어요. 학생에게 주기 전에 한 번씩 검산해요.</span></div>
+      <div class="promise"><b>판단은 교사가</b><span>채점·출결·생활지도의 최종 결정은 선생님이 해요. 도구는 확인할 것을 골라 주는 역할까지예요.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="share">
+  <div class="wrap">
+    <h2>공유 · 설문</h2>
+    <p class="sub">완성했으면 공유보드에 올리고, 마지막에 설문에 답해 주세요.</p>
+    <div class="big-links" id="shareLinks"></div>
+  </div>
+</section>
+
+<footer class="wrap">
+  2026 보문고 바이브코딩 연수 · 강사 대성여자고등학교 구정화 · 레시피와 예시는 연수 후에도 자유롭게 쓰셔도 돼요.
+</footer>
+
+<script>
+/* ───────── ✏️ 연수 당일 정보는 여기만 바꾸면 돼요 ───────── */
+const INFO = {
+  date: "",        // 예: "11월 ○일(수) 14:00~17:00"
+  place: "",       // 예: "보문고 컴퓨터실"
+  padlet: "",      // 패들렛 공유보드 주소
+  survey: "",      // 사후 설문 주소
+};
+/* ───────────────────────────────────────────── */
+
+const facts = [
+  ["일시", INFO.date || "추후 안내"],
+  ["장소", INFO.place || "추후 안내"],
+  ["준비물", "구글 계정 · 크롬"],
+];
+document.getElementById("facts").innerHTML = facts.map(([k, v]) => `<span><b>${k}</b>${v}</span>`).join("");
+
+const link = (url, title, desc) => url
+  ? `<a class="big-link ${title.includes("공유") ? "primary" : ""}" href="${url}" target="_blank" rel="noopener"><strong>${title}</strong><span>${desc}</span><span class="go">열기 →</span></a>`
+  : `<div class="big-link" aria-disabled="true"><strong>${title}</strong><span>${desc}</span><span class="pending">연수 당일에 열려요</span></div>`;
+document.getElementById("shareLinks").innerHTML =
+  link(INFO.padlet, "공유보드에 올리기", "작품 링크(또는 화면 캡처)와 한 줄 소개를 올리고, 서로 써 보며 댓글을 남겨요.") +
+  link(INFO.survey, "사후 설문", "만든 것 · 실제로 쓸지 · 다음에 배우고 싶은 것 (3분)");
+
+// 시작 전 체크 기억하기 (이 브라우저에만)
+document.querySelectorAll(".checks input").forEach(cb => {
+  try { cb.checked = localStorage.getItem("bm-" + cb.id) === "1"; } catch (e) {}
+  cb.addEventListener("change", () => { try { localStorage.setItem("bm-" + cb.id, cb.checked ? "1" : "0"); } catch (e) {} });
+});
+</script>
+</body>
+</html>

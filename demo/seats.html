@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리 반 자리 배치</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #f3f6f9; --card: #fff; --ink: #1d2733; --muted: #66727f; --line: #d8e0e8;
+    --accent: #2459a8; --accent-soft: #e4edf9; --fixed: #fff1d6; --fixed-ink: #8a5a00;
+    --empty: #eef1f4; --warn: #c2410c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; word-break: keep-all; }
+  .app { display: grid; grid-template-columns: 300px 1fr; gap: 20px; max-width: 1400px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+  aside { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; align-self: start; }
+  h1 { font-family: "Do Hyeon", sans-serif; font-weight: 400; font-size: 30px; margin: 0; }
+  label { font-size: 14px; font-weight: 700; display: block; margin-bottom: 4px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  input, textarea { width: 100%; font: inherit; font-size: 15px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  textarea { height: 90px; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 500; }
+  .check input { width: auto; }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: #fff; padding: 9px 12px; font-weight: 700; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-size: 18px; padding: 12px; }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .msg { font-size: 13px; color: var(--warn); min-height: 1em; }
+  main { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 18px; overflow-x: auto; }
+  .desk-front { background: #3b4a5a; color: #fff; padding: 8px 60px; border-radius: 8px; font-weight: 700; letter-spacing: .3em; }
+  .room { display: flex; gap: 28px; }
+  .room.flipped { flex-direction: row-reverse; }
+  .pair { display: grid; gap: 10px; }
+  .room.flipped .pair { direction: rtl; }
+  .seat { width: 96px; height: 76px; border-radius: 12px; background: var(--accent-soft); border: 2px solid transparent; display: grid; place-items: center; text-align: center; user-select: none; cursor: grab; transition: transform .12s; }
+  .seat b { font-family: "Do Hyeon", sans-serif; font-weight: 400; font-size: 32px; line-height: 1; color: var(--accent); }
+  .seat small { display: block; font-size: 14px; margin-top: 2px; font-weight: 500; }
+  .seat.fixed { background: var(--fixed); } .seat.fixed b { color: var(--fixed-ink); }
+  .seat.empty { background: var(--empty); cursor: default; }
+  .seat.over { border-color: var(--accent); transform: scale(1.05); }
+  .seat.pop { animation: pop .35s ease; }
+  @keyframes pop { from { transform: scale(.6); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+  .legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+  .flipnote { font-size: 13px; color: var(--muted); }
+  @media (max-width: 860px) { .app { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .seat, .seat.pop { animation: none; transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>🪑 자리 배치</h1>
+    <div class="row">
+      <div><label for="cols">열</label><input id="cols" type="number" min="2" max="10" value="6"></div>
+      <div><label for="rows">줄</label><input id="rows" type="number" min="2" max="8" value="5"></div>
+      <div><label for="count">학생 수</label><input id="count" type="number" min="2" max="80" value="28"></div>
+    </div>
+    <div>
+      <label for="fixed">앞자리 고정 번호</label>
+      <input id="fixed" placeholder="예: 3, 15">
+      <div class="hint">시력·청력 등으로 앞줄에 앉아야 하는 번호</div>
+    </div>
+    <div>
+      <label for="apart">떨어뜨릴 번호</label>
+      <input id="apart" placeholder="예: 4-9, 12-20">
+      <div class="hint">두 번호가 앞뒤·옆·대각선으로 붙지 않게</div>
+    </div>
+    <label class="check"><input id="noRepeat" type="checkbox" checked> 지난번 짝과 겹치지 않게</label>
+    <div>
+      <label for="names">이름 (선택)</label>
+      <textarea id="names" placeholder="한 줄에 한 명씩, 1번부터 순서대로"></textarea>
+      <div class="hint">이름은 이 컴퓨터 브라우저에만 저장돼요</div>
+    </div>
+    <button class="primary" id="shuffle">🎲 랜덤 배치</button>
+    <div class="msg" id="msg"></div>
+    <div class="btns">
+      <button id="flip">↕ 교사 시점</button>
+      <button id="save">🖼 이미지 저장</button>
+    </div>
+  </aside>
+  <main>
+    <div class="desk-front" id="front">교 탁</div>
+    <div class="room" id="room"></div>
+    <div class="legend">
+      <span style="--c: var(--accent-soft)">일반</span>
+      <span style="--c: var(--fixed)">앞자리 고정</span>
+      <span style="--c: var(--empty)">빈자리</span>
+    </div>
+    <div class="flipnote">자리를 끌어다 놓으면 두 학생이 서로 바뀌어요.</div>
+  </main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const memory = {};   // 브라우저 저장이 막혀 있어도 지금 화면에서는 기억
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("seat-" + k); if (v) return JSON.parse(v); } catch (e) {} return k in memory ? memory[k] : d; },
+  set(k, v) { memory[k] = v; try { localStorage.setItem("seat-" + k, JSON.stringify(v)); } catch (e) {} },
+};
+
+let layout = [];      // layout[r][c] = 번호 or null
+let flipped = false;
+
+const nums = s => s.split(/[,\s]+/).map(Number).filter(n => n > 0);
+const pairsOf = s => s.split(",").map(p => p.split("-").map(x => Number(x.trim()))).filter(p => p.length === 2 && p[0] && p[1]);
+const names = () => $("names").value.split("\n");
+
+function shuffleArr(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// 짝 = 같은 줄에서 (0,1) (2,3) (4,5) … 열끼리
+const partnerCol = c => (c % 2 === 0 ? c + 1 : c - 1);
+function partnersOf(lay) {
+  const set = new Set();
+  lay.forEach(row => row.forEach((n, c) => {
+    const m = row[partnerCol(c)];
+    if (n && m) set.add([n, m].sort((a, b) => a - b).join("-"));
+  }));
+  return set;
+}
+
+function tryArrange(cols, rows, count, fixed, apart, prevPairs) {
+  const seats = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) seats.push([r, c]);
+  const usable = seats.slice(0, count);                  // 앞에서부터 학생 수만큼 사용
+  const frontSeats = shuffleArr(usable.filter(([r]) => r === 0));
+  const lay = Array.from({ length: rows }, () => Array(cols).fill(null));
+  const fixedOk = fixed.filter(n => n <= count).slice(0, frontSeats.length);
+  fixedOk.forEach((n, i) => { const [r, c] = frontSeats[i]; lay[r][c] = n; });
+  const rest = shuffleArr(Array.from({ length: count }, (_, i) => i + 1).filter(n => !fixedOk.includes(n)));
+  usable.forEach(([r, c]) => { if (lay[r][c] === null) lay[r][c] = rest.pop(); });
+
+  const pos = {};
+  lay.forEach((row, r) => row.forEach((n, c) => { if (n) pos[n] = [r, c]; }));
+  for (const [a, b] of apart) {
+    if (!pos[a] || !pos[b]) continue;
+    if (Math.abs(pos[a][0] - pos[b][0]) <= 1 && Math.abs(pos[a][1] - pos[b][1]) <= 1) return null;
+  }
+  if (prevPairs) for (const p of partnersOf(lay)) if (prevPairs.has(p)) return null;
+  return lay;
+}
+
+function arrange() {
+  const cols = +$("cols").value, rows = +$("rows").value, count = +$("count").value;
+  if (count > cols * rows) { $("msg").textContent = `자리(${cols * rows}개)보다 학생(${count}명)이 많아요.`; return; }
+  const fixed = nums($("fixed").value), apart = pairsOf($("apart").value);
+  const prev = $("noRepeat").checked ? new Set(store.get("prevPairs", [])) : null;
+  let lay = null, relaxed = false;
+  for (let i = 0; i < 5000 && !lay; i++) lay = tryArrange(cols, rows, count, fixed, apart, prev);
+  if (!lay) { relaxed = true; for (let i = 0; i < 5000 && !lay; i++) lay = tryArrange(cols, rows, count, fixed, apart, null); }
+  if (!lay) { $("msg").textContent = "조건을 모두 만족하는 배치를 찾지 못했어요. 조건을 줄여 보세요."; return; }
+  $("msg").textContent = relaxed ? "지난번 짝 조건은 지키지 못했어요. 나머지 조건은 지켰어요." : "";
+  layout = lay;
+  store.set("prevPairs", [...partnersOf(layout)]);
+  store.set("layout", layout);
+  render(true);
+}
+
+function render(animate) {
+  const fixed = nums($("fixed").value), nm = names();
+  const room = $("room");
+  room.className = "room" + (flipped ? " flipped" : "");
+  room.innerHTML = "";
+  const rows = layout.length, cols = layout[0]?.length || 0;
+  for (let c = 0; c < cols; c += 2) {
+    const pair = document.createElement("div");
+    pair.className = "pair";
+    pair.style.gridTemplateColumns = `repeat(${Math.min(2, cols - c)}, 96px)`;
+    const rowOrder = [...Array(rows).keys()];
+    if (flipped) rowOrder.reverse();
+    for (const r of rowOrder) for (let cc = c; cc < Math.min(c + 2, cols); cc++) {
+      const n = layout[r][cc];
+      const seat = document.createElement("div");
+      seat.className = "seat" + (n ? "" : " empty") + (n && fixed.includes(n) ? " fixed" : "") + (animate && n ? " pop" : "");
+      if (animate) seat.style.animationDelay = (Math.random() * 0.4).toFixed(2) + "s";
+      seat.dataset.r = r; seat.dataset.c = cc;
+      seat.innerHTML = n ? `<div><b>${n}</b>${nm[n - 1]?.trim() ? `<small>${nm[n - 1].trim()}</small>` : ""}</div>` : "";
+      if (n) { seat.draggable = true; }
+      pair.appendChild(seat);
+    }
+    room.appendChild(pair);
+  }
+  const front = $("front");
+  front.parentNode.insertBefore(front, flipped ? null : room);
+  if (flipped) front.parentNode.insertBefore(front, room.nextSibling);
+}
+
+// 드래그로 자리 바꾸기
+let dragFrom = null;
+$("room").addEventListener("dragstart", e => { const s = e.target.closest(".seat"); if (s) dragFrom = [+s.dataset.r, +s.dataset.c]; });
+$("room").addEventListener("dragover", e => { const s = e.target.closest(".seat"); if (s) { e.preventDefault(); s.classList.add("over"); } });
+$("room").addEventListener("dragleave", e => { const s = e.target.closest(".seat"); if (s) s.classList.remove("over"); });
+$("room").addEventListener("drop", e => {
+  const s = e.target.closest(".seat"); if (!s || !dragFrom) return;
+  e.preventDefault();
+  const [r1, c1] = dragFrom, r2 = +s.dataset.r, c2 = +s.dataset.c;
+  [layout[r1][c1], layout[r2][c2]] = [layout[r2][c2], layout[r1][c1]];
+  dragFrom = null;
+  store.set("layout", layout);
+  render(false);
+});
+
+// 이미지 저장: 캔버스에 직접 그리기
+$("save").addEventListener("click", () => {
+  const rows = layout.length, cols = layout[0].length, nm = names(), fixed = nums($("fixed").value);
+  const W = 110, H = 86, gap = 10, aisle = 36, pad = 40;
+  const pairs = Math.ceil(cols / 2);
+  const width = pad * 2 + cols * W + (cols - pairs) * gap + (pairs - 1) * aisle;
+  const height = pad * 2 + 70 + rows * H + (rows - 1) * gap + 30;
+  const cv = document.createElement("canvas");
+  cv.width = width * 2; cv.height = height * 2;
+  const g = cv.getContext("2d"); g.scale(2, 2);
+  g.fillStyle = "#fff"; g.fillRect(0, 0, width, height);
+  const font = '"IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif';
+  const deskY = flipped ? height - pad - 40 : pad;
+  g.fillStyle = "#3b4a5a"; g.fillRect(width / 2 - 90, deskY, 180, 40);
+  g.fillStyle = "#fff"; g.font = `bold 18px ${font}`; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillText("교 탁", width / 2, deskY + 20);
+  const top = flipped ? pad : pad + 70;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const vr = flipped ? rows - 1 - r : r, vc = flipped ? cols - 1 - c : c;
+    const x = pad + vc * W + (vc - Math.floor(vc / 2)) * gap + Math.floor(vc / 2) * aisle;
+    const y = top + vr * (H + gap);
+    const n = layout[r][c];
+    g.fillStyle = !n ? "#eef1f4" : fixed.includes(n) ? "#fff1d6" : "#e4edf9";
+    g.beginPath(); g.roundRect(x, y, W, H, 12); g.fill();
+    if (n) {
+      g.fillStyle = "#2459a8"; g.font = `bold 30px ${font}`;
+      const name = nm[n - 1]?.trim();
+      g.fillText(n, x + W / 2, y + (name ? H / 2 - 12 : H / 2));
+      if (name) { g.fillStyle = "#1d2733"; g.font = `16px ${font}`; g.fillText(name, x + W / 2, y + H / 2 + 20); }
+    }
+  }
+  g.fillStyle = "#66727f"; g.font = `13px ${font}`;
+  g.fillText(new Date().toLocaleDateString("ko-KR") + " 자리 배치", width / 2, height - 14);
+  const a = document.createElement("a");
+  a.download = "자리배치_" + new Date().toISOString().slice(0, 10) + ".png";
+  a.href = cv.toDataURL("image/png");
+  a.click();
+});
+
+$("shuffle").addEventListener("click", arrange);
+$("flip").addEventListener("click", () => { flipped = !flipped; $("flip").textContent = flipped ? "↕ 학생 시점" : "↕ 교사 시점"; render(false); });
+$("names").addEventListener("input", () => { store.set("names", $("names").value); render(false); });
+$("fixed").addEventListener("change", () => render(false));
+["cols", "rows", "count"].forEach(id => $(id).addEventListener("change", arrange));
+
+$("names").value = store.get("names", "");
+const saved = store.get("layout", null);
+if (saved && saved.length === +$("rows").value && saved[0].length === +$("cols").value) { layout = saved; render(false); }
+else arrange();
+</script>
+</body>
+</html>

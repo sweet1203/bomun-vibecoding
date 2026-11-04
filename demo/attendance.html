@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>출결 이상 확인기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f8; --card: #fff; --ink: #221d2b; --muted: #6c6578; --line: #e0dce7;
+    --accent: #7a3f8f; --accent-soft: #f1e8f5; --bad: #c62828; --bad-soft: #fdecec; --ok: #2e7d4f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; word-break: keep-all; font-size: 15px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px; display: grid; gap: 18px; }
+  h1 { font-family: "Do Hyeon", sans-serif; font-weight: 400; font-size: 36px; margin: 0; }
+  .sub { color: var(--muted); margin: 4px 0 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0; }
+  .card h2 { font-size: 17px; margin: 0 0 12px; }
+  .drop { border: 2.5px dashed var(--line); border-radius: 14px; padding: 34px 16px; text-align: center; background: var(--card); transition: border-color .15s, background .15s; }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop strong { font-size: 20px; display: block; margin-bottom: 6px; }
+  .drop .lock { color: var(--ok); font-size: 14px; margin-top: 10px; }
+  button, .filebtn { font: inherit; cursor: pointer; border-radius: 9px; border: 1px solid var(--line); background: #fff; padding: 8px 14px; font-weight: 700; color: var(--ink); }
+  button.primary, .filebtn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .map { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+  .map label { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+  select, input[type=number] { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .rules { display: grid; gap: 8px; }
+  .rules label { display: flex; gap: 8px; align-items: center; }
+  .rules input[type=number] { width: 60px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .stat .k { font-size: 13px; color: var(--muted); }
+  .stat .v { font-family: "Do Hyeon", sans-serif; font-size: 38px; font-variant-numeric: tabular-nums; }
+  .stat.alert .v { color: var(--bad); }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .toolbar .grow { flex: 1; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted); font-weight: 700; background: var(--bg); position: sticky; top: 0; }
+  tr.flag td { background: var(--bad-soft); }
+  .tag { display: inline-block; background: var(--bad); color: #fff; border-radius: 5px; padding: 1px 7px; font-size: 12px; margin: 1px 3px 1px 0; white-space: nowrap; }
+  td.num { text-align: right; }
+  td.hot { color: var(--bad); font-weight: 700; }
+  .empty { color: var(--muted); text-align: center; padding: 30px; }
+  .hidden { display: none !important; }
+  @media (max-width: 800px) { .two, .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📋 출결 이상 확인기</h1>
+    <p class="sub">나이스 출결 엑셀을 넣으면 마감 전에 확인할 것만 골라 보여 줘요.</p>
+  </header>
+
+  <section class="drop" id="drop">
+    <strong>엑셀 파일을 여기에 끌어다 놓으세요</strong>
+    <span class="sub">.xlsx · .xls · .csv</span>
+    <div class="btnrow">
+      <label class="filebtn" for="file">파일 고르기</label>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" class="hidden">
+      <button id="sample">연습용 가짜 데이터로 보기</button>
+      <button id="sampleDown">가짜 데이터 엑셀 받기</button>
+    </div>
+    <div class="lock">🔒 파일은 이 컴퓨터의 브라우저 안에서만 읽어요. 인터넷으로 보내지 않아요.</div>
+  </section>
+
+  <div class="two hidden" id="settings">
+    <section class="card">
+      <h2>열 이름 맞추기 <span class="sub" style="font-weight:400;font-size:13px">· 파일의 제목 줄에서 자동으로 골랐어요</span></h2>
+      <div class="map" id="map"></div>
+    </section>
+    <section class="card">
+      <h2>확인 규칙</h2>
+      <div class="rules">
+        <label><input type="checkbox" id="r1" checked> 결석·지각·조퇴·결과인데 사유가 비어 있음</label>
+        <label><input type="checkbox" id="r2" checked> 질병으로 처리했는데 증빙 미제출</label>
+        <label><input type="checkbox" id="r3" checked> 같은 번호가 평일 <input type="number" id="r3n" min="2" value="3"> 일 이상 연속 결석</label>
+        <label><input type="checkbox" id="r4" checked> 미인정 결석이 한 달에 <input type="number" id="r4n" min="1" value="3"> 일 이상</label>
+      </div>
+    </section>
+  </div>
+
+  <div class="stats hidden" id="stats"></div>
+
+  <section class="card hidden" id="detail">
+    <div class="toolbar">
+      <h2 style="margin:0">출결 기록</h2>
+      <span class="grow"></span>
+      <select id="month" aria-label="월 고르기"></select>
+      <label><input type="checkbox" id="onlyFlag"> 확인할 것만 보기</label>
+      <button class="primary" id="export">확인 목록 엑셀로 받기</button>
+    </div>
+    <div class="tablewrap"><table id="records"></table></div>
+  </section>
+
+  <section class="card hidden" id="summary">
+    <h2>번호별 합계</h2>
+    <div class="tablewrap"><table id="sumTable"></table></div>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const FIELDS = [
+  { key: "no",     label: "번호",     guess: ["번호", "학번"] },
+  { key: "date",   label: "날짜",     guess: ["날짜", "일자", "출결일"] },
+  { key: "type",   label: "출결 구분", guess: ["출결구분", "구분", "출결"] },
+  { key: "reason", label: "사유",     guess: ["사유", "내용"] },
+  { key: "proof",  label: "증빙 제출", guess: ["증빙", "서류"] },
+];
+
+// 연습용 가짜 데이터 (실제 학생과 관계없음)
+const SAMPLE = [
+  ["번호", "날짜", "출결구분", "사유", "증빙제출"],
+  [2,  "2026-11-02", "질병지각",   "병원 진료",     "Y"],
+  [5,  "2026-11-03", "질병결석",   "독감",         "Y"],
+  [5,  "2026-11-04", "질병결석",   "독감",         "Y"],
+  [5,  "2026-11-05", "질병결석",   "독감",         "N"],
+  [8,  "2026-11-06", "질병지각",   "복통",         "N"],
+  [11, "2026-11-09", "출석인정결석", "대회 참가",     "Y"],
+  [12, "2026-11-10", "미인정결석", "",             "N"],
+  [14, "2026-11-11", "질병조퇴",   "두통",         "Y"],
+  [17, "2026-11-02", "미인정결석", "무단",         "N"],
+  [17, "2026-11-09", "미인정결석", "무단",         "N"],
+  [17, "2026-11-16", "미인정결석", "무단",         "N"],
+  [20, "2026-11-12", "미인정지각", "늦잠",         "N"],
+  [21, "2026-11-13", "질병결과",   "",             "Y"],
+  [23, "2026-11-16", "기타결석",   "가족 경조사",   "Y"],
+  [26, "2026-11-17", "질병결석",   "장염",         "Y"],
+  [26, "2026-11-18", "질병결석",   "장염",         "Y"],
+  [27, "2026-11-19", "미인정조퇴", "",             "N"],
+  [9,  "2026-10-27", "질병결석",   "감기",         "N"],
+];
+
+let header = [], rows = [], mapping = {}, checked = [];
+
+// 파일 읽기
+const drop = $("drop");
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) readFile(f); });
+$("file").addEventListener("change", e => { const f = e.target.files[0]; if (f) readFile(f); });
+$("sample").addEventListener("click", () => load(SAMPLE));
+$("sampleDown").addEventListener("click", () => {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(SAMPLE), "출결");
+  XLSX.writeFile(wb, "연습용_가짜출결.xlsx");
+});
+
+function readFile(file) {
+  const fr = new FileReader();
+  fr.onload = () => {
+    const wb = XLSX.read(fr.result, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    load(XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, dateNF: "yyyy-mm-dd", defval: "" }));
+  };
+  fr.readAsArrayBuffer(file);
+}
+
+function load(aoa) {
+  // 제목 줄 = '번호'나 '날짜'가 들어 있는 첫 줄
+  const hi = Math.max(0, aoa.findIndex(r => r.some(c => /번호|날짜|일자/.test(String(c)))));
+  header = aoa[hi].map(c => String(c).trim());
+  rows = aoa.slice(hi + 1).filter(r => r.some(c => String(c).trim() !== ""));
+  // 정확히 같은 제목을 먼저, 그다음 포함하는 제목. 한 열은 한 항목에만 연결
+  mapping = {};
+  const usedCols = new Set(), norm = h => h.replace(/\s/g, "");
+  FIELDS.forEach(f => mapping[f.key] = -1);
+  [(h, g) => norm(h) === g, (h, g) => norm(h).includes(g)].forEach(match => {
+    FIELDS.forEach(f => {
+      if (mapping[f.key] >= 0) return;
+      for (const g of f.guess) {
+        const idx = header.findIndex((h, i) => !usedCols.has(i) && match(h, g));
+        if (idx >= 0) { mapping[f.key] = idx; usedCols.add(idx); return; }
+      }
+    });
+  });
+  $("map").innerHTML = FIELDS.map(f => `<label>${f.label}<select data-k="${f.key}">
+    <option value="-1">(없음)</option>${header.map((h, i) => `<option value="${i}" ${mapping[f.key] === i ? "selected" : ""}>${h || "(빈 제목 " + (i + 1) + ")"}</option>`).join("")}
+  </select></label>`).join("");
+  ["settings", "stats", "detail", "summary"].forEach(id => $(id).classList.remove("hidden"));
+  analyze();
+}
+$("map").addEventListener("change", e => { mapping[e.target.dataset.k] = +e.target.value; analyze(); });
+["r1", "r2", "r3", "r3n", "r4", "r4n"].forEach(id => $(id).addEventListener("input", analyze));
+["month", "onlyFlag"].forEach(id => $(id).addEventListener("change", draw));
+
+// 날짜 정리: 2026-11-03, 2026.11.03, 11/3/26 등
+function toDate(v) {
+  if (v instanceof Date) return v;
+  const s = String(v).trim();
+  let m = s.match(/(\d{4})[.\-\/년\s]+(\d{1,2})[.\-\/월\s]+(\d{1,2})/);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) return new Date(+m[3] < 100 ? 2000 + +m[3] : +m[3], +m[1] - 1, +m[2]);
+  return null;
+}
+const ymd = d => d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "";
+const kindOf = t => /결석/.test(t) ? "결석" : /지각/.test(t) ? "지각" : /조퇴/.test(t) ? "조퇴" : /결과/.test(t) ? "결과" : "";
+const noProof = p => /^(n|no|x|미제출|아니오|)$/i.test(String(p).trim());
+function nextWeekday(d) { const n = new Date(d); do n.setDate(n.getDate() + 1); while (n.getDay() === 0 || n.getDay() === 6); return n; }
+
+function analyze() {
+  const get = (r, k) => mapping[k] >= 0 ? String(r[mapping[k]] ?? "").trim() : "";
+  checked = rows.map(r => {
+    const rec = { no: get(r, "no"), date: toDate(mapping.date >= 0 ? r[mapping.date] : ""), type: get(r, "type"), reason: get(r, "reason"), proof: get(r, "proof"), flags: [] };
+    rec.kind = kindOf(rec.type);
+    return rec;
+  }).filter(r => r.no);
+
+  checked.forEach(r => {
+    if ($("r1").checked && r.kind && !r.reason) r.flags.push("사유 없음");
+    if ($("r2").checked && /질병/.test(r.type) && mapping.proof >= 0 && noProof(r.proof)) r.flags.push("증빙 미제출");
+  });
+
+  // 연속 결석
+  const byNo = {};
+  checked.filter(r => r.kind === "결석" && r.date).forEach(r => (byNo[r.no] = byNo[r.no] || []).push(r));
+  if ($("r3").checked) {
+    const need = Math.max(2, +$("r3n").value || 3);
+    Object.values(byNo).forEach(list => {
+      list.sort((a, b) => a.date - b.date);
+      let run = [list[0]];
+      const flush = () => { if (run.length >= need) run.forEach(r => r.flags.push(`${run.length}일 연속 결석`)); };
+      for (let i = 1; i < list.length; i++) {
+        if (ymd(nextWeekday(list[i - 1].date)) === ymd(list[i].date)) run.push(list[i]);
+        else { flush(); run = [list[i]]; }
+      }
+      flush();
+    });
+  }
+  // 미인정 결석 누적 (월별)
+  if ($("r4").checked) {
+    const need = Math.max(1, +$("r4n").value || 3), cnt = {};
+    checked.filter(r => r.kind === "결석" && /미인정/.test(r.type) && r.date).forEach(r => {
+      const k = r.no + "|" + ymd(r.date).slice(0, 7); (cnt[k] = cnt[k] || []).push(r);
+    });
+    Object.values(cnt).forEach(list => { if (list.length >= need) list.forEach(r => r.flags.push(`미인정 ${list.length}회`)); });
+  }
+
+  const months = [...new Set(checked.filter(r => r.date).map(r => ymd(r.date).slice(0, 7)))].sort();
+  const cur = $("month").value;
+  $("month").innerHTML = `<option value="">전체 기간</option>` + months.map(m => `<option value="${m}" ${m === cur ? "selected" : ""}>${+m.slice(5)}월</option>`).join("");
+  draw();
+}
+
+function draw() {
+  const month = $("month").value;
+  const inMonth = checked.filter(r => !month || ymd(r.date).startsWith(month));
+  const flagged = inMonth.filter(r => r.flags.length);
+  const list = $("onlyFlag").checked ? flagged : inMonth;
+  const students = new Set(flagged.map(r => r.no));
+
+  $("stats").innerHTML = [
+    ["전체 기록", inMonth.length + "건", false],
+    ["확인할 기록", flagged.length + "건", flagged.length > 0],
+    ["확인할 학생", students.size + "명", students.size > 0],
+    ["증빙 미제출", inMonth.filter(r => r.flags.includes("증빙 미제출")).length + "건", false],
+  ].map(([k, v, a]) => `<div class="stat ${a ? "alert" : ""}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+
+  const sorted = [...list].sort((a, b) => (+a.no - +b.no) || (a.date - b.date));
+  $("records").innerHTML = `<thead><tr><th>번호</th><th>날짜</th><th>출결 구분</th><th>사유</th><th>증빙</th><th>확인할 점</th></tr></thead><tbody>` +
+    (sorted.length ? sorted.map(r => `<tr class="${r.flags.length ? "flag" : ""}"><td>${esc(r.no)}</td><td>${ymd(r.date)}</td><td>${esc(r.type)}</td><td>${esc(r.reason) || "<span style='color:var(--bad)'>(비어 있음)</span>"}</td><td>${esc(r.proof)}</td><td>${r.flags.map(f => `<span class="tag">${f}</span>`).join("")}</td></tr>`).join("")
+      : `<tr><td colspan="6" class="empty">확인할 기록이 없어요 👍</td></tr>`) + "</tbody>";
+
+  const sum = {};
+  inMonth.forEach(r => {
+    const s = sum[r.no] = sum[r.no] || { 결석: 0, 지각: 0, 조퇴: 0, 결과: 0, flags: 0 };
+    if (r.kind) s[r.kind]++;
+    if (r.flags.length) s.flags++;
+  });
+  const nos = Object.keys(sum).sort((a, b) => +a - +b);
+  $("sumTable").innerHTML = `<thead><tr><th>번호</th><th>결석</th><th>지각</th><th>조퇴</th><th>결과</th><th>확인할 기록</th></tr></thead><tbody>` +
+    nos.map(n => { const s = sum[n]; return `<tr><td>${esc(n)}</td>${["결석", "지각", "조퇴", "결과"].map(k => `<td class="num">${s[k]}</td>`).join("")}<td class="num ${s.flags ? "hot" : ""}">${s.flags}</td></tr>`; }).join("") + "</tbody>";
+}
+
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+$("export").addEventListener("click", () => {
+  const month = $("month").value;
+  const out = [["번호", "날짜", "출결구분", "사유", "증빙제출", "확인할 점"]];
+  checked.filter(r => r.flags.length && (!month || ymd(r.date).startsWith(month)))
+    .sort((a, b) => (+a.no - +b.no) || (a.date - b.date))
+    .forEach(r => out.push([r.no, ymd(r.date), r.type, r.reason, r.proof, r.flags.join(", ")]));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(out), "확인할 것");
+  XLSX.writeFile(wb, `출결_확인목록_${month || "전체"}.xlsx`);
+});
+</script>
+</body>
+</html>

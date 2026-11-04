@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모둠 대항 퀴즈쇼</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #14213d; --panel: #1d2d50; --tile: #2b4c8c; --tile-hi: #3a62b0; --used: #2a3550;
+    --ink: #f6f7fb; --muted: #a9b4cc; --gold: #ffc94a; --good: #34c38f; --bad: #ef5d60;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; word-break: keep-all; }
+  .display { font-family: "Do Hyeon", sans-serif; font-weight: 400; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 12px; }
+  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  /* 시작 화면 */
+  #setup { min-height: 100vh; display: grid; place-items: center; text-align: center; padding: 24px; }
+  #setup h1 { font-size: clamp(48px, 8vw, 96px); margin: 0; color: var(--gold); }
+  #setup p { color: var(--muted); font-size: 20px; }
+  .team-pick { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 24px 0; }
+  .team-pick button { width: 72px; height: 72px; font-size: 32px; background: var(--panel); color: var(--ink); }
+  .team-pick button[aria-pressed="true"] { background: var(--gold); color: var(--bg); }
+  .start { background: var(--good); color: #fff; font-size: 26px; padding: 14px 48px; }
+
+  /* 게임 화면 */
+  #game { display: none; padding: 20px; max-width: 1500px; margin: 0 auto; }
+  .scores { display: grid; gap: 12px; margin-bottom: 20px; }
+  .team { background: var(--panel); border-radius: 14px; padding: 10px 12px; text-align: center; position: relative; border-top: 6px solid var(--c); }
+  .team .name { font-size: 20px; color: var(--muted); }
+  .team .pts { font-size: 54px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .team .adj { display: flex; gap: 6px; justify-content: center; }
+  .team .adj button { background: transparent; color: var(--muted); border: 1px solid var(--used); padding: 2px 10px; font-size: 14px; }
+  .team.lead .pts { color: var(--gold); }
+  .board { display: grid; gap: 12px; }
+  .topic { background: var(--panel); border-radius: 12px; padding: 14px; text-align: center; font-size: 30px; color: var(--gold); }
+  .tile { background: var(--tile); color: var(--gold); font-size: 56px; padding: 22px 0; transition: background .15s, transform .15s; }
+  .tile:hover { background: var(--tile-hi); transform: translateY(-2px); }
+  .tile.used { background: var(--used); color: transparent; pointer-events: none; }
+  .tile.chance::after { content: ""; }
+  .bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; color: var(--muted); }
+  .bar button { background: var(--panel); color: var(--ink); padding: 10px 18px; }
+
+  /* 문제 화면 */
+  #modal { position: fixed; inset: 0; background: rgba(8, 14, 30, .94); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 32px; text-align: center; }
+  #modal.open { display: flex; }
+  .qmeta { font-size: 28px; color: var(--gold); }
+  .qtext { font-size: clamp(36px, 5vw, 64px); line-height: 1.35; max-width: 1100px; text-wrap: balance; }
+  .answer { font-size: clamp(32px, 4.5vw, 56px); color: var(--good); min-height: 1.3em; }
+  .timer { width: min(700px, 90vw); height: 16px; background: var(--panel); border-radius: 99px; overflow: hidden; }
+  .timer div { height: 100%; background: var(--gold); width: 100%; }
+  .timer.low div { background: var(--bad); }
+  .secs { font-size: 34px; font-variant-numeric: tabular-nums; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .actions button { padding: 12px 22px; font-size: 20px; background: var(--panel); color: var(--ink); }
+  .actions .reveal { background: var(--gold); color: var(--bg); }
+  .who { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .who button { padding: 12px 20px; font-size: 22px; color: #fff; background: var(--c); }
+  .who-label { color: var(--muted); font-size: 18px; }
+
+  /* 우승 화면 */
+  #winner { position: fixed; inset: 0; background: var(--bg); display: none; place-items: center; text-align: center; }
+  #winner.open { display: grid; }
+  #winner h2 { font-size: clamp(60px, 10vw, 130px); margin: 0; color: var(--gold); }
+  #winner p { font-size: 30px; color: var(--muted); }
+  canvas#confetti { position: fixed; inset: 0; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+</style>
+</head>
+<body>
+
+<section id="setup">
+  <div>
+    <h1 class="display">모둠 대항 퀴즈쇼</h1>
+    <p>몇 모둠이 겨루나요?</p>
+    <div class="team-pick" id="teamPick"></div>
+    <button class="start display" id="start">게임 시작</button>
+  </div>
+</section>
+
+<section id="game">
+  <div class="scores" id="scores"></div>
+  <div class="board" id="board"></div>
+  <div class="bar">
+    <span id="left"></span>
+    <button id="finish">게임 끝내기 🏆</button>
+  </div>
+</section>
+
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="qtext">
+  <div class="qmeta display" id="qmeta"></div>
+  <div class="qtext display" id="qtext"></div>
+  <div class="answer display" id="answer"></div>
+  <div class="timer" id="timer"><div id="timerFill"></div></div>
+  <div class="secs" id="secs"></div>
+  <div class="actions">
+    <button class="reveal" id="reveal">정답 보기</button>
+    <button id="pause">⏸ 일시정지</button>
+    <button id="close">아무도 못 맞힘</button>
+  </div>
+  <div class="who-label">맞힌 모둠을 누르면 점수가 올라가요</div>
+  <div class="who" id="who"></div>
+</div>
+
+<div id="winner"><div><p>🏆 우승</p><h2 class="display" id="winName"></h2><p id="winScore"></p><button class="start display" id="again">다시 하기</button></div></div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* ───────── ✏️ 문제는 여기만 바꾸면 돼요 ───────── */
+const SECONDS = 30;
+const TOPICS = [
+  {
+    name: "과학 상식",
+    items: [
+      { q: "물의 화학식은?", a: "H₂O" },
+      { q: "빛의 삼원색 세 가지는?", a: "빨강 · 초록 · 파랑" },
+      { q: "지구 대기에서 가장 많은(약 78%) 기체는?", a: "질소" },
+    ],
+  },
+  {
+    name: "우리말",
+    items: [
+      { q: "손가락으로 방향을 알려 줄 때 맞는 말은?\n가르치다 / 가리키다", a: "가리키다" },
+      { q: "바른 표기는?\n어이없다 / 어의없다", a: "어이없다" },
+      { q: "'지금 바로'라는 뜻의 바른 표기는?\n금새 / 금세", a: "금세 ('금시에'가 줄어든 말)" },
+    ],
+  },
+  {
+    name: "AI 상식",
+    items: [
+      { q: "AI에게 일을 시키려고 입력하는 지시문을 무엇이라고 할까요?", a: "프롬프트" },
+      { q: "AI가 사실이 아닌 내용을 그럴듯하게 지어내는 현상은?", a: "환각 (할루시네이션)" },
+      { q: "코드를 직접 쓰지 않고 AI에게 말로 설명해서 프로그램을 만드는 방식은?", a: "바이브 코딩" },
+    ],
+  },
+];
+const POINTS = [100, 200, 300];
+const TEAM_NAMES = ["호랑이", "독수리", "돌고래", "판다", "여우", "부엉이", "펭귄", "사자"];
+const TEAM_COLORS = ["#ef5d60", "#34c38f", "#4aa3ff", "#ffc94a", "#b77cf5", "#ff8a3d", "#2ec4c4", "#f06cb3"];
+/* ──────────────────────────────────────────── */
+
+const $ = id => document.getElementById(id);
+let teamCount = 4, scores = [], used = new Set(), current = null, timerId = null, remain = 0, paused = false;
+
+// 효과음 (브라우저 내장 소리)
+let ctx;
+function beep(freq, dur, type = "sine", when = 0) {
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(.25, ctx.currentTime + when);
+  g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + when + dur);
+  o.connect(g).connect(ctx.destination);
+  o.start(ctx.currentTime + when); o.stop(ctx.currentTime + when + dur);
+}
+const sound = {
+  open: () => { beep(523, .12); beep(784, .2, "sine", .12); },
+  tick: () => beep(880, .06, "square"),
+  end: () => { beep(220, .5, "sawtooth"); },
+  correct: () => { [523, 659, 784, 1047].forEach((f, i) => beep(f, .18, "triangle", i * .1)); },
+};
+
+// 시작 화면
+$("teamPick").innerHTML = [2, 3, 4, 5, 6, 7, 8].map(n => `<button class="display" data-n="${n}" aria-pressed="${n === teamCount}">${n}</button>`).join("");
+$("teamPick").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  teamCount = +b.dataset.n;
+  [...$("teamPick").children].forEach(x => x.setAttribute("aria-pressed", x === b));
+});
+$("start").addEventListener("click", startGame);
+
+function startGame() {
+  scores = Array(teamCount).fill(0); used = new Set();
+  $("setup").style.display = "none"; $("game").style.display = "block"; $("winner").classList.remove("open");
+  renderScores(); renderBoard();
+}
+
+function renderScores() {
+  const max = Math.max(...scores);
+  $("scores").style.gridTemplateColumns = `repeat(${teamCount}, minmax(0, 1fr))`;
+  $("scores").innerHTML = scores.map((s, i) => `
+    <div class="team ${s === max && s > 0 ? "lead" : ""}" style="--c:${TEAM_COLORS[i]}">
+      <div class="name">${TEAM_NAMES[i]}</div>
+      <div class="pts display">${s}</div>
+      <div class="adj"><button data-t="${i}" data-d="-100" aria-label="${TEAM_NAMES[i]} 100점 빼기">−100</button><button data-t="${i}" data-d="100" aria-label="${TEAM_NAMES[i]} 100점 더하기">+100</button></div>
+    </div>`).join("");
+  const total = TOPICS.length * POINTS.length;
+  $("left").textContent = `남은 문제 ${total - used.size} / ${total}`;
+}
+$("scores").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]"); if (!b) return;
+  scores[+b.dataset.t] += +b.dataset.d; renderScores();
+});
+
+function renderBoard() {
+  $("board").style.gridTemplateColumns = `repeat(${TOPICS.length}, minmax(0, 1fr))`;
+  let html = TOPICS.map(t => `<div class="topic display">${t.name}</div>`).join("");
+  POINTS.forEach((p, pi) => TOPICS.forEach((t, ti) => {
+    const key = ti + "-" + pi;
+    html += `<button class="tile display ${used.has(key) ? "used" : ""}" data-key="${key}">${p}</button>`;
+  }));
+  $("board").innerHTML = html;
+}
+$("board").addEventListener("click", e => {
+  const b = e.target.closest(".tile"); if (!b) return;
+  const [ti, pi] = b.dataset.key.split("-").map(Number);
+  openQuestion(ti, pi);
+});
+
+function openQuestion(ti, pi) {
+  current = { ti, pi, key: ti + "-" + pi, pts: POINTS[pi], item: TOPICS[ti].items[pi] };
+  $("qmeta").textContent = `${TOPICS[ti].name} · ${POINTS[pi]}점`;
+  $("qtext").innerHTML = current.item.q.replace(/\n/g, "<br>");
+  $("answer").textContent = "";
+  $("who").innerHTML = scores.map((_, i) => `<button class="display" data-t="${i}" style="--c:${TEAM_COLORS[i]}">${TEAM_NAMES[i]}</button>`).join("");
+  $("modal").classList.add("open");
+  sound.open();
+  remain = SECONDS; paused = false; $("pause").textContent = "⏸ 일시정지";
+  updateTimer();
+  clearInterval(timerId);
+  timerId = setInterval(() => {
+    if (paused) return;
+    remain--;
+    if (remain <= 5 && remain > 0) sound.tick();
+    if (remain <= 0) { clearInterval(timerId); sound.end(); }
+    updateTimer();
+  }, 1000);
+}
+function updateTimer() {
+  $("timerFill").style.width = (remain / SECONDS * 100) + "%";
+  $("timer").classList.toggle("low", remain <= 5);
+  $("secs").textContent = remain > 0 ? `${remain}초` : "시간 끝!";
+}
+function closeQuestion() {
+  clearInterval(timerId);
+  used.add(current.key);
+  $("modal").classList.remove("open");
+  renderScores(); renderBoard();
+  if (used.size === TOPICS.length * POINTS.length) setTimeout(showWinner, 400);
+}
+$("reveal").addEventListener("click", () => { $("answer").textContent = "정답: " + current.item.a; paused = true; $("pause").textContent = "▶ 계속"; });
+$("pause").addEventListener("click", () => { paused = !paused; $("pause").textContent = paused ? "▶ 계속" : "⏸ 일시정지"; });
+$("close").addEventListener("click", closeQuestion);
+$("who").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  scores[+b.dataset.t] += current.pts; sound.correct(); closeQuestion();
+});
+document.addEventListener("keydown", e => {
+  if (!$("modal").classList.contains("open")) return;
+  if (e.key === " ") { e.preventDefault(); $("reveal").click(); }
+  if (e.key === "Escape") closeQuestion();
+});
+
+// 우승 화면 + 폭죽
+$("finish").addEventListener("click", showWinner);
+$("again").addEventListener("click", () => { $("winner").classList.remove("open"); $("game").style.display = "none"; $("setup").style.display = "grid"; });
+function showWinner() {
+  const max = Math.max(...scores);
+  const winners = scores.map((s, i) => s === max ? TEAM_NAMES[i] : null).filter(Boolean);
+  $("winName").textContent = winners.join(" · ") + " 모둠";
+  $("winScore").textContent = `${max}점`;
+  $("winner").classList.add("open");
+  sound.correct();
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) confetti();
+}
+function confetti() {
+  const cv = $("confetti"), g = cv.getContext("2d");
+  cv.width = innerWidth; cv.height = innerHeight;
+  const ps = Array.from({ length: 180 }, () => ({
+    x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5,
+    vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 4, r: 4 + Math.random() * 6,
+    c: TEAM_COLORS[Math.floor(Math.random() * TEAM_COLORS.length)], a: Math.random() * 6,
+  }));
+  let frame = 0;
+  (function loop() {
+    g.clearRect(0, 0, cv.width, cv.height);
+    ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.a += .1; g.fillStyle = p.c; g.save(); g.translate(p.x, p.y); g.rotate(p.a); g.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6); g.restore(); });
+    if (++frame < 260) requestAnimationFrame(loop); else g.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+</script>
+</body>
+</html>
