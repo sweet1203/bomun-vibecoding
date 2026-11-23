@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 앱을 링크로 공유하기 · Netlify Drop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+  /* A4 세로 한 장: 위 제목 띠 → 4단계(2×2) → 아래 도움말 3칸 + QR */
+  @page { size: A4; margin: 11mm 12mm; }
+  :root {
+    --ink: #1b2622; --muted: #5b6b64; --line: #d9e1dc; --paper: #ffffff;
+    --accent: #1f6b4f; --accent-soft: #e3efe8; --teal: #2a9d99; --warn-bg: #fff4ec; --warn-ink: #8a3d10;
+    --code-bg: #f0f4f1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body { font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-size: 10pt; line-height: 1.55; word-break: keep-all; }
+  .page { width: 186mm; margin: 0 auto; padding: 8mm 0; }
+  @media print { .page { padding: 0; } }
+
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; padding-bottom: 4mm; border-bottom: 2px solid var(--ink); }
+  .eyebrow { font-size: 8.5pt; font-weight: 700; color: var(--accent); letter-spacing: .08em; }
+  h1 { font-family: "Do Hyeon", "Noto Sans KR", sans-serif; font-weight: 400; font-size: 25pt; line-height: 1.15; margin: 1mm 0 1.5mm; }
+  .lead { margin: 0; color: var(--muted); font-size: 10pt; }
+  .tags { display: flex; flex-direction: column; gap: 1.5mm; align-items: flex-end; flex: none; }
+  .tag { border: 1.5px solid var(--accent); color: var(--accent); border-radius: 99px; padding: .6mm 3mm; font-size: 8.5pt; font-weight: 700; white-space: nowrap; }
+
+  .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-top: 5mm; }
+  .step { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm; display: flex; flex-direction: column; gap: 2mm; }
+  .step-head { display: flex; align-items: center; gap: 2.5mm; }
+  .num { width: 8mm; height: 8mm; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11pt; flex: none; }
+  .step h2 { font-size: 12.5pt; margin: 0; line-height: 1.3; }
+  .step p { margin: 0; }
+  .step ul { margin: 0; padding-left: 4.5mm; }
+  .step li { margin: .6mm 0; }
+  code, .kbd { font-family: "Noto Sans KR", monospace; background: var(--code-bg); border-radius: 1mm; padding: 0 1.2mm; font-weight: 700; font-size: 9.5pt; }
+  .os { font-size: 8.5pt; font-weight: 700; color: var(--accent); margin-right: 1mm; }
+  .shot { display: block; width: 100%; height: 32mm; object-fit: cover; object-position: center 100%; border-radius: 2mm; border: 1px solid var(--line); }
+  .url { font-weight: 700; color: var(--accent); }
+  .note { background: var(--accent-soft); border-radius: 2mm; padding: 2mm 3mm; font-size: 9pt; }
+  .warnline { color: var(--warn-ink); font-weight: 700; }
+
+  .bottom { display: grid; grid-template-columns: 1fr 1fr 1fr 36mm; gap: 4mm; margin-top: 4mm; }
+  .box { border-radius: 3mm; padding: 3.5mm; font-size: 9pt; }
+  .box h3 { margin: 0 0 1.5mm; font-size: 10.5pt; }
+  .box p { margin: 0 0 1mm; }
+  .box.fix { background: var(--code-bg); }
+  .box.stuck { border: 1px solid var(--line); }
+  .box.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .qrs { display: flex; flex-direction: column; gap: 2.5mm; align-items: center; }
+  .qr { text-align: center; font-size: 8pt; font-weight: 700; }
+  .qr img { width: 24mm; height: 24mm; display: block; margin: 0 auto 1mm; }
+
+  footer { margin-top: 4mm; padding-top: 2.5mm; border-top: 1px solid var(--line); display: flex; justify-content: space-between; color: var(--muted); font-size: 8.5pt; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <div class="eyebrow">2026 보문고 바이브코딩 연수 · 공유 안내</div>
+      <h1>내 앱을 링크로 공유하기</h1>
+      <p class="lead">Gemini Canvas로 만든 앱을 학생·동료가 휴대폰으로 여는 주소(<b>○○.netlify.app</b>)로 바꿔요.</p>
+    </div>
+    <div class="tags">
+      <span class="tag">Netlify Drop</span>
+      <span class="tag">무료</span>
+      <span class="tag">구글 계정으로 로그인</span>
+    </div>
+  </header>
+
+  <section class="steps">
+    <div class="step">
+      <div class="step-head"><span class="num">1</span><h2>코드를 index.html로 저장하기</h2></div>
+      <ul>
+        <li>Canvas에서 <b>코드 보기</b> → 코드 <b>전체 복사</b></li>
+        <li><span class="os">Windows</span>메모장에 붙여넣기 → <b>다른 이름으로 저장</b><br>
+          파일 이름 <code>index.html</code> · 파일 형식 <b>모든 파일</b> · 인코딩 <b>UTF-8</b></li>
+        <li><span class="os">Mac</span>텍스트 편집기에 붙여넣기 → 메뉴 <b>포맷 → 일반 텍스트로 만들기</b> → <code>index.html</code>로 저장</li>
+      </ul>
+      <p class="note">저장한 파일을 <b>더블클릭</b>해서 브라우저에서 잘 열리는지 먼저 확인해요.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="num">2</span><h2>Netlify Drop에 끌어다 놓기</h2></div>
+      <p>인터넷 주소창에 <span class="url">app.netlify.com/drop</span> 을 열고, <code>index.html</code> 파일을 <b>Drop here</b> 상자에 끌어다 놓아요.</p>
+      <img class="shot" src="img/drop.jpg" alt="Netlify Drop 화면의 Drop here 상자">
+      <p style="font-size:9pt;color:var(--muted)">그림·파일이 여러 개인 앱은 그 파일들이 든 <b>폴더째</b> 끌어다 놓아요.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="num">3</span><h2>구글로 로그인해서 내 것으로 만들기</h2></div>
+      <p>몇 초 뒤 주소가 생기고, 프로젝트를 <b>가져가라(Claim)</b>는 안내가 나와요.</p>
+      <ul>
+        <li><b>Google 계정으로 로그인</b>하면 이 프로젝트가 내 것이 돼요.</li>
+        <li>처음이면 가입 화면이 나와요. 무료 플랜 그대로 쓰면 돼요.</li>
+      </ul>
+      <p class="warnline">로그인하지 않으면 주소가 잠기거나 나중에 사라질 수 있어요.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="num">4</span><h2>주소 확인하고 공유보드에 올리기</h2></div>
+      <ul>
+        <li><b>○○.netlify.app</b> 주소를 복사해요.</li>
+        <li>로그인하지 않은 <b>시크릿 창</b>에 붙여넣어 열리는지 확인해요.<br>
+          <span style="font-size:9pt;color:var(--muted)">Chrome 시크릿 창: <span class="kbd">Ctrl+Shift+N</span> (Mac <span class="kbd">⌘+Shift+N</span>)</span></li>
+        <li>오른쪽 아래 QR의 <b>패들렛</b>에 주소와 <b>한 줄 소개</b>를 올려요.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="box fix">
+      <h3>고쳤을 때는?</h3>
+      <p>Netlify에서 <b>내 프로젝트</b>를 열고, 배포(Production deploys) 영역에 고친 파일을 <b>다시 끌어다 놓아요.</b></p>
+      <p><b>같은 주소</b>로 바뀐 내용이 올라가요.</p>
+    </div>
+    <div class="box stuck">
+      <h3>막혔을 때</h3>
+      <p><b>비밀번호를 물어봐요</b> → 3단계 로그인을 했는지 확인</p>
+      <p><b>흰 화면 · 글자 깨짐</b> → 이름이 <code>index.html</code>인지, UTF-8로 저장했는지 확인</p>
+      <p><b>주소 이름 바꾸기</b> → 프로젝트 설정에서 이름 변경</p>
+    </div>
+    <div class="box warn">
+      <h3>꼭 지켜요</h3>
+      <p>주소를 아는 사람은 <b>누구나</b> 열 수 있어요.</p>
+      <p>학생 이름·성적·출결 같은 <b>개인정보가 든 파일은 올리지 않아요.</b></p>
+    </div>
+    <div class="qrs">
+      <div class="qr"><img src="img/qr-drop.png" alt="Netlify Drop QR">Netlify Drop</div>
+      <div class="qr"><img src="img/qr-padlet.png" alt="패들렛 공유보드 QR">패들렛 공유보드</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>연수 사이트 sweet1203.github.io/bomun-vibecoding · 「링크로 공유하기」</span>
+    <span>대성여자고등학교 구정화</span>
+  </footer>
+</div>
+</body>
+</html>

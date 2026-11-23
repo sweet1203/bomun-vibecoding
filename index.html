@@ -267,7 +267,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
     <details>
       <summary>Netlify 주소를 열었더니 비밀번호를 물어봐요</summary>
       <div>
-        <p>로그인하지 않고 올리면 임시 비밀번호로 잠겨 있어요. Netlify에 <b>가입·로그인해서 프로젝트를 내 것으로 가져오면(Claim)</b> 풀려요.</p>
+        <p>로그인하지 않고 올리면 임시 비밀번호로 잠겨 있어요. <b>Google 계정으로 로그인해서 프로젝트를 내 것으로 가져오면(Claim)</b> 풀려요.</p>
         <p>가져온 뒤에도 잠겨 있으면 프로젝트가 비공개로 설정된 경우예요. 프로젝트 설정에서 공개로 바꾸고, 시크릿 창에서 다시 열어 확인해요.</p>
       </div>
     </details>
@@ -305,16 +305,16 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
 <section id="netlify">
   <div class="wrap">
     <h2>링크로 공유하기 (Netlify)</h2>
-    <p class="sub">내가 만든 앱을 학생·동료가 휴대폰으로 열 수 있는 주소로 만들어요. 무료예요.</p>
+    <p class="sub">내가 만든 앱을 학생·동료가 휴대폰으로 열 수 있는 주소로 만들어요. 무료예요. <a href="netlify-guide.html" target="_blank" rel="noopener">한 장짜리 안내문 보기</a> · <a href="netlify-guide.pdf" target="_blank" rel="noopener">PDF</a></p>
     <ol class="steps">
-      <li><div><b>새 폴더를 만들고 index.html로 저장</b><span>바탕화면에 영문 이름의 새 폴더를 만들어요(예: <code>seat-app</code>). Canvas 코드를 전체 복사해 메모장에 붙여넣고, 그 폴더 안에 이름 <b>index.html</b>, 파일 형식 <b>모든 파일</b>, 인코딩 <b>UTF-8</b>로 저장해요.</span></div></li>
-      <li><div><b>Netlify Drop에 폴더를 통째로 끌어다 놓기</b><span><a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a>을 열고, 파일이 아니라 <b>폴더째</b> 화면에 끌어다 놓아요. 몇 초 뒤 <code>○○.netlify.app</code> 주소가 생겨요.</span></div></li>
-      <li><div><b>가입·로그인해서 내 것으로 가져오기 (Claim)</b><span>그냥 두면 임시 비밀번호로 잠겨 있고 계속 남지 않아요. 화면의 안내에 따라 Netlify에 가입·로그인해서 프로젝트를 가져와요.</span></div></li>
+      <li><div><b>코드를 index.html로 저장</b><span>Canvas 코드를 전체 복사해 메모장에 붙여넣고, 이름 <b>index.html</b>, 파일 형식 <b>모든 파일</b>, 인코딩 <b>UTF-8</b>로 저장해요. Mac은 텍스트 편집기에서 <b>포맷 → 일반 텍스트로 만들기</b> 후 저장해요.</span></div></li>
+      <li><div><b>Netlify Drop에 끌어다 놓기</b><span><a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a>을 열고 <b>index.html 파일</b>을 「Drop here」 상자에 끌어다 놓아요. 그림·파일이 여러 개인 앱은 그 파일들이 든 <b>폴더째</b> 놓아요. 몇 초 뒤 <code>○○.netlify.app</code> 주소가 생겨요.</span></div></li>
+      <li><div><b>구글로 로그인해서 내 것으로 만들기 (Claim)</b><span>프로젝트를 가져가라는 안내가 나오면 <b>Google 계정으로 로그인</b>해요. 로그인하지 않으면 주소가 잠기거나 나중에 사라질 수 있어요. 무료 플랜 그대로 쓰면 돼요.</span></div></li>
       <li><div><b>시크릿 창에서 열어 보고, 공유보드에 올리기</b><span>로그인하지 않은 창에서도 열리는지 확인한 뒤, 주소와 한 줄 소개를 아래 공유보드에 올려요.</span></div></li>
     </ol>
     <div class="panel" style="margin-top:12px">
       <b>고쳤을 때는?</b>
-      <p style="margin:6px 0 0">Netlify에서 내 프로젝트를 열고, 배포(Production deploys) 영역에 고친 폴더를 다시 끌어다 놓으면 <b>같은 주소</b>로 바뀐 내용이 올라가요.</p>
+      <p style="margin:6px 0 0">Netlify에서 내 프로젝트를 열고, 배포(Production deploys) 영역에 고친 파일을 다시 끌어다 놓으면 <b>같은 주소</b>로 바뀐 내용이 올라가요.</p>
       <p class="pending" style="margin:4px 0 0">학생 이름·성적 같은 개인정보가 들어간 파일은 올리지 않아요. 주소를 아는 사람은 누구나 열 수 있어요.</p>
     </div>
   </div>
