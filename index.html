@@ -122,7 +122,8 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
     <a href="#tracks">트랙 고르기</a>
     <a href="#stuck">막혔을 때</a>
     <a href="#rules">약속</a>
-    <a href="#share">공유 · 설문</a>
+    <a href="#netlify">링크로 공유</a>
+    <a href="#share">공유보드</a>
   </div>
 </nav>
 
@@ -170,15 +171,14 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
 <section id="flow">
   <div class="wrap">
     <h2>오늘의 흐름</h2>
-    <p class="sub">3시간 기준이에요. 중간에 10분 쉬어요.</p>
+    <p class="sub">처음 해 보셔도 따라오실 수 있게, 보고 → 같이 만들고 → 혼자 만드는 순서예요.</p>
     <div class="panel">
       <ol class="timeline">
-        <li><div class="time">15분</div><div><b>바이브코딩 보기</b><span>강사가 자리 배치 프로그램을 말로 만들고 고치는 모습을 봐요.</span></div></li>
-        <li><div class="time">15분</div><div><b>동료 교사 사례</b><span>수학·국어·영어 선생님이 만든 수업 도구를 둘러봐요.</span></div></li>
-        <li><div class="time">30분</div><div><b>다 같이 첫 앱 완성</b><span>레시피 카드 「랜덤 모둠 편성 & 발표자 뽑기」를 모두 함께 만들어요.</span></div></li>
-        <li><div class="time">70분</div><div><b>내 트랙 골라 만들기</b><span>수업 · 학급 · 업무 중 하나를 골라 만들고 세 번 이상 고쳐요.</span></div></li>
-        <li><div class="time">20분</div><div><b>잘 쓰는 법</b><span>개인정보, AI 결과 확인, 저장과 공유 방법</span></div></li>
-        <li><div class="time">20분</div><div><b>갤러리 워크</b><span>공유보드에 내 작품을 올리고 서로 써 보며 댓글을 남겨요.</span></div></li>
+        <li><div class="time">1</div><div><b>강사가 만든 웹앱 둘러보기</b><span>수업과 업무에 실제로 쓰고 있는 사이트를 직접 열어 봐요.</span></div></li>
+        <li><div class="time">2</div><div><b>바이브코딩 보기</b><span>강사가 자리 배치 프로그램을 말로 만들고 고치는 모습을 보고, 동료 교사 사례도 둘러봐요.</span></div></li>
+        <li><div class="time">3</div><div><b>다 같이 첫 앱 완성</b><span>레시피 카드 「랜덤 모둠 편성 & 발표자 뽑기」를 모두 함께 만들어요.</span></div></li>
+        <li><div class="time">4</div><div><b>내 트랙 골라 만들기</b><span>수업 · 학급 · 업무 중 하나를 골라 만들고 세 번 이상 고쳐요.</span></div></li>
+        <li><div class="time">5</div><div><b>잘 쓰는 법 & 링크로 공유</b><span>개인정보와 AI 결과 확인 약속을 짚고, Netlify로 링크를 만들어 공유보드에 올려요.</span></div></li>
       </ol>
     </div>
   </div>
@@ -192,7 +192,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
       <li><div><b>Canvas를 켜고 프롬프트 붙여넣기</b><span>레시피 카드의 「프롬프트 복사」를 눌러 붙여넣고, 노란 [대괄호]만 내 상황으로 바꿔서 보내요.</span></div></li>
       <li><div><b>직접 눌러 보기</b><span>오른쪽 미리보기에서 버튼을 눌러 보고, 이상한 곳이나 더 있었으면 하는 기능을 찾아요.</span></div></li>
       <li><div><b>한 번에 하나씩 말로 고치기</b><span>「↻ 고쳐 보기」 문장을 누르면 복사돼요. 여러 개를 한꺼번에 시키면 엉키기 쉬워요.</span></div></li>
-      <li><div><b>공유하거나 파일로 저장하기</b><span>공유 버튼으로 링크를 만들거나, 코드를 .html 파일로 저장해요. 방법은 아래 「막혔을 때」에 있어요.</span></div></li>
+      <li><div><b>링크로 만들어 공유하기</b><span>코드를 index.html로 저장하고 Netlify에 끌어다 놓으면 누구나 여는 주소가 생겨요. 방법은 아래 「<a href="#netlify">링크로 공유하기</a>」에 있어요.</span></div></li>
     </ol>
     <div class="panel" style="margin-top:12px">
       <b>내 아이디어로 만들 때</b>
@@ -265,9 +265,10 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
       <div><q class="say">고친 부분까지 합쳐서 전체 코드를 다시 줘.</q></div>
     </details>
     <details>
-      <summary>공유 링크를 만들고 싶어요</summary>
+      <summary>Netlify 주소를 열었더니 비밀번호를 물어봐요</summary>
       <div>
-        <p>Canvas 화면의 <b>공유</b> 버튼으로 링크를 만들 수 있어요. 받는 사람이 로그인해야 열리는 경우가 있으니, 학생에게 주기 전에 다른 브라우저(시크릿 창)에서 열어 확인해요.</p>
+        <p>로그인하지 않고 올리면 임시 비밀번호로 잠겨 있어요. Netlify에 <b>가입·로그인해서 프로젝트를 내 것으로 가져오면(Claim)</b> 풀려요.</p>
+        <p>가져온 뒤에도 잠겨 있으면 프로젝트가 비공개로 설정된 경우예요. 프로젝트 설정에서 공개로 바꾸고, 시크릿 창에서 다시 열어 확인해요.</p>
       </div>
     </details>
     <details>
@@ -301,10 +302,28 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
   </div>
 </section>
 
+<section id="netlify">
+  <div class="wrap">
+    <h2>링크로 공유하기 (Netlify)</h2>
+    <p class="sub">내가 만든 앱을 학생·동료가 휴대폰으로 열 수 있는 주소로 만들어요. 무료예요.</p>
+    <ol class="steps">
+      <li><div><b>새 폴더를 만들고 index.html로 저장</b><span>바탕화면에 영문 이름의 새 폴더를 만들어요(예: <code>seat-app</code>). Canvas 코드를 전체 복사해 메모장에 붙여넣고, 그 폴더 안에 이름 <b>index.html</b>, 파일 형식 <b>모든 파일</b>, 인코딩 <b>UTF-8</b>로 저장해요.</span></div></li>
+      <li><div><b>Netlify Drop에 폴더를 통째로 끌어다 놓기</b><span><a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a>을 열고, 파일이 아니라 <b>폴더째</b> 화면에 끌어다 놓아요. 몇 초 뒤 <code>○○.netlify.app</code> 주소가 생겨요.</span></div></li>
+      <li><div><b>가입·로그인해서 내 것으로 가져오기 (Claim)</b><span>그냥 두면 임시 비밀번호로 잠겨 있고 계속 남지 않아요. 화면의 안내에 따라 Netlify에 가입·로그인해서 프로젝트를 가져와요.</span></div></li>
+      <li><div><b>시크릿 창에서 열어 보고, 공유보드에 올리기</b><span>로그인하지 않은 창에서도 열리는지 확인한 뒤, 주소와 한 줄 소개를 아래 공유보드에 올려요.</span></div></li>
+    </ol>
+    <div class="panel" style="margin-top:12px">
+      <b>고쳤을 때는?</b>
+      <p style="margin:6px 0 0">Netlify에서 내 프로젝트를 열고, 배포(Production deploys) 영역에 고친 폴더를 다시 끌어다 놓으면 <b>같은 주소</b>로 바뀐 내용이 올라가요.</p>
+      <p class="pending" style="margin:4px 0 0">학생 이름·성적 같은 개인정보가 들어간 파일은 올리지 않아요. 주소를 아는 사람은 누구나 열 수 있어요.</p>
+    </div>
+  </div>
+</section>
+
 <section id="share">
   <div class="wrap">
-    <h2>공유 · 설문</h2>
-    <p class="sub">완성했으면 공유보드에 올리고, 마지막에 설문에 답해 주세요.</p>
+    <h2>공유보드</h2>
+    <p class="sub">완성한 앱의 주소와 한 줄 소개를 올리고, 다른 선생님 작품도 눌러 보세요.</p>
     <div class="big-links" id="shareLinks"></div>
   </div>
 </section>
@@ -316,10 +335,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 40px 48px; }
 <script>
 /* ───────── ✏️ 연수 당일 정보는 여기만 바꾸면 돼요 ───────── */
 const INFO = {
-  date: "",        // 예: "11월 ○일(수) 14:00~17:00"
-  place: "",       // 예: "보문고 컴퓨터실"
+  date: "12월 2일(수) 14:30",
+  place: "보문고등학교",
   padlet: "",      // 패들렛 공유보드 주소
-  survey: "",      // 사후 설문 주소
 };
 /* ───────────────────────────────────────────── */
 
@@ -334,8 +352,8 @@ const link = (url, title, desc) => url
   ? `<a class="big-link ${title.includes("공유") ? "primary" : ""}" href="${url}" target="_blank" rel="noopener"><strong>${title}</strong><span>${desc}</span><span class="go">열기 →</span></a>`
   : `<div class="big-link" aria-disabled="true"><strong>${title}</strong><span>${desc}</span><span class="pending">연수 당일에 열려요</span></div>`;
 document.getElementById("shareLinks").innerHTML =
-  link(INFO.padlet, "공유보드에 올리기", "작품 링크(또는 화면 캡처)와 한 줄 소개를 올리고, 서로 써 보며 댓글을 남겨요.") +
-  link(INFO.survey, "사후 설문", "만든 것 · 실제로 쓸지 · 다음에 배우고 싶은 것 (3분)");
+  link(INFO.padlet, "공유보드에 올리기", "Netlify 주소(또는 화면 캡처)와 한 줄 소개를 올리고, 서로 써 보며 댓글을 남겨요.") +
+  link("https://app.netlify.com/drop", "Netlify Drop 열기", "index.html이 든 폴더를 끌어다 놓으면 주소가 생겨요.");
 
 // 시작 전 체크 기억하기 (이 브라우저에만)
 document.querySelectorAll(".checks input").forEach(cb => {
